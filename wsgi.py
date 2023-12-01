@@ -6,7 +6,7 @@ import random
 import randomname
 from App.database import db, get_migrate
 from App.main import create_app
-from App.controllers import ( create_user, create_staff, create_student, get_all_users_json, get_all_users )
+from App.controllers import ( create_user, create_staff, add_student_information, get_all_users_json, get_all_users )
 from App.views import (generate_random_contact_number)
 from App.models import *
 
