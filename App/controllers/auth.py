@@ -46,26 +46,30 @@ def setup_jwt(app):
 
     @jwt.user_identity_loader
     def user_identity_lookup(identity):
-        for model in [Admin, Staff]:
-            user = get_user(identity, model)
-            if user:
-                return user.ID
+        admin = Admin.query.filter_by(ID=identity).one_or_none()
+        if admin:
+            return admin.ID
+
+        staff = Staff.query.filter_by(ID=identity).one_or_none()
+        if staff:
+            return staff.ID
+        
         return None
 
 
-@jwt.user_lookup_loader
-def user_lookup_callback(_jwt_header, jwt_data):
-    identity = jwt_data["sub"]
+    @jwt.user_lookup_loader
+    def user_lookup_callback(_jwt_header, jwt_data):
+        identity = jwt_data["sub"]
 
-    admin = Admin.query.filter_by(ID=identity).one_or_none()
-    if admin:
-        return admin
+        admin = Admin.query.filter_by(ID=identity).one_or_none()
+        if admin:
+            return admin
 
-    staff = Staff.query.filter_by(ID=identity).one_or_none()
-    if staff:
-        return staff
+        staff = Staff.query.filter_by(ID=identity).one_or_none()
+        if staff:
+            return staff
 
-    return jwt
+        return jwt
 
 def staff_required(func):
     @wraps(func)
@@ -82,4 +86,4 @@ def admin_required(func):
         if not current_user.is_authenticated or not isinstance(current_user, Admin):
             return "Unauthorized", 401
         return func(*args, **kwargs)
-    return wrapper
+    return wrapper 

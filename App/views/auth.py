@@ -26,13 +26,18 @@ def create_staff_action():
   data = request.json
   
   #validate data
-  if not data['firstname'] or not data['lastname'] or not data['password'] or not data['staffID'] or not data['email'] or not data['teachingExperience']:
+  if not data['staffID'] or not data['firstname'] or not data['lastname'] or not data['password'] or not data['email'] or not data['teachingExperience']:
     return jsonify({"error": "Invalid request data"}), 400
-  
+	  
+  email=data['email']	  
+  email_status = email.endswith("@sta.uwi.edu")
+  if email_status == False:
+      return jsonify({"error": "Invalid email extenstion"}), 400	
+	
   if get_student(data['staffID']) or get_staff(data['staffID']) or get_admin(data['staffID']):
     return jsonify({"error": f"A user already uses the ID {data['staffID']}"}), 400
   else:    
-    staff = create_staff(jwt_current_user, data['firstname'], data['lastname'], data['password'], data['staffID'], data['email'], data['teachingExperience'])
+    staff = create_staff(data['staffID'], data['firstname'], data['lastname'], data['password'], data['email'], data['teachingExperience'])
     if staff:
       return jsonify({"message": f"Staff created with ID {staff.ID}"}, staff.to_json()), 200
     else:

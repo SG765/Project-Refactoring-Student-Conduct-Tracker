@@ -14,6 +14,7 @@ from App.controllers.review import (
     get_reviews_for_student, 
     get_review
 )
+from App.models.staff import Staff
 
 # Create a Blueprint for Review views
 review_views = Blueprint("review_views", __name__, template_folder='../templates')
@@ -34,7 +35,7 @@ def view_review(review_id):
         return 'Review does not exist', 404
 
 #Route to upvote review 
-@review_views.route('/reviews/<int:review_id>', methods=['POST'])
+@review_views.route('/reviews/<int:review_id>/upvote', methods=['POST'])
 @jwt_required()
 def upvote (review_id):
     if not jwt_current_user or not isinstance(jwt_current_user, Staff):
@@ -56,7 +57,7 @@ def upvote (review_id):
         return'Review does not exist', 404
 
 #Route to downvote review 
-@review_views.route('/reviews/<int:review_id>', methods=['POST'])
+@review_views.route('/reviews/<int:review_id>/downvote', methods=['POST'])
 @jwt_required()
 def downvote (review_id):
     if not jwt_current_user or not isinstance(jwt_current_user, Staff):
@@ -69,7 +70,7 @@ def downvote (review_id):
             current = review.downvotes
             new_votes= downvote(review_id, staff)
             if new_votes == current: 
-               return jsonify(review.to_json(), 'Review Already Downvoted'), 201 
+               return jsonify(review.to_json(), 'Review Already Downvoted'), 400 
             else:
                 return jsonify(review.to_json(), 'Review Downvoted Successfully'), 200 
         else: 
@@ -100,7 +101,7 @@ def get_reviews_from_staff(staff_id):
     return "Staff does not exist", 404
 
 # Route to edit a review
-@review_views.route("/review/edit/<int:review_id>", methods=["PUT"])
+@review_views.route("/review/<int:review_id>", methods=["PUT"])
 @jwt_required()
 def review_edit(review_id):
     review = get_review(review_id)
@@ -129,7 +130,7 @@ def review_edit(review_id):
 
 
 # Route to delete a review
-@review_views.route("/reviews/delete/<int:review_id>", methods=["DELETE"])
+@review_views.route("/reviews/<int:review_id>", methods=["DELETE"])
 @jwt_required()
 def review_delete(review_id):
     review = get_review(review_id)
@@ -145,4 +146,3 @@ def review_delete(review_id):
         return "Review deleted successfully", 200
     else:
         return "Issue deleting review", 400
-

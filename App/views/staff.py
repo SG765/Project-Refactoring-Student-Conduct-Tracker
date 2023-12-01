@@ -49,7 +49,7 @@ def create_review_action(student_id):
         return jsonify(review.to_json()), 201
     return 'Failed to create review', 400
 
-@staff_views.route('/students/search/<string:search_term>', methods=['GET'])
+@staff_views.route('/students/<string:search_term>', methods=['GET'])
 @jwt_required()
 def search_students(search_term):
   if jwt_current_user and isinstance(jwt_current_user, Staff): 
