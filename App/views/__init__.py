@@ -4,6 +4,7 @@ from .user import *
 from .index import *
 from .review import *
 from .staff import *
+from .admin import *
 from .auth import *
 from .admin import *
 
