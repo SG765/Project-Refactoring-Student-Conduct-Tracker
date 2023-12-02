@@ -61,6 +61,12 @@ def test_update(client):
 
 		assert response.status_code == 200
 
+def test_init_route(client):
+    # Send a POST request to the /init route
+    response = client.post('/init')
+
+    # Check if the response status code is 201 (Created)
+    assert response.status_code == 201
 
 # Test the create_staff_action route with the admin_required decorator
 '''def test_create_staff_action(client):

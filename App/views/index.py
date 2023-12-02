@@ -20,11 +20,11 @@ def generate_random_contact_number():
 
 @index_views.route('/init', methods=['POST'])
 def init():
-  db.drop_all(checkfirst=True)
+  db.drop_all()
   db.create_all()
   admin= create_user('bob', 'boblast' , 'bobpass')
   for ID in  range(2, 50): 
-    staff= create_staff(admin, 
+    staff= create_staff(
           str(ID), 
           randomname.get_name(), 
           randomname.get_name(), 
