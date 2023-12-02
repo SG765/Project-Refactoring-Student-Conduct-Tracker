@@ -2,8 +2,8 @@ from App.models import Staff, Student, Admin
 from App.database import db
 
 
-def create_staff(staffID, firstname, lastname, password, email, teachingExperience):
-    new_staff = Staff(staffID=staffID, firstname=firstname, lastname=lastname, password=password, email=email, teachingExperience=teachingExperience)
+def create_staff(staffID, firstname, lastname, password, email, yearStartedTeaching):
+    new_staff = Staff(staffID=staffID, firstname=firstname, lastname=lastname, password=password, email=email, yearStartedTeaching=yearStartedTeaching)
     if new_staff:
         db.session.add(new_staff)
         db.session.commit()
