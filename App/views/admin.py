@@ -118,7 +118,7 @@ def update_students():
                 else:
                     student_updated=update_student(admin=jwt_current_user, student=student, field_to_update=row['field_for_update'], new_value=row['new_value'])
                     if student_updated is None:
-                        return jsonify({'error': f"ID already exists {row['ID']}"}), 400
+                        return jsonify({'error': f"Error Updating student type for student with ID {student.ID}"}), 400
                     
                     return jsonify({"message": "Students information updated successfully"}), 200
             else: 
