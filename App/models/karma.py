@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from App.database import db
 from .student import Student
+from sqlalchemy import ForeignKey
 
 
 class Karma(db.Model):
