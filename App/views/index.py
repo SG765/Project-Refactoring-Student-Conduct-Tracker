@@ -1,7 +1,8 @@
 import random
 from flask import Blueprint, render_template, jsonify
 from App.controllers.admin import add_student_information
-from App.models import db
+from App.database import db, get_migrate
+from App.models import *
 from App.controllers import create_user, create_staff
 import randomname
 

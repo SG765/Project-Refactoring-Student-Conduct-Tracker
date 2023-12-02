@@ -20,16 +20,10 @@ review_staff_downvoters = db.Table(
 class Review(db.Model):
   __tablename__ = 'review'
   ID = db.Column(db.Integer, primary_key=True)
-  reviewerID = db.Column(
-      db.String(10),
-      db.ForeignKey('staff.ID'))  #each review has 1 creator
+  reviewerID = db.Column(db.String(10), db.ForeignKey('staff.ID'))  #each review has 1 creator
 
   #create reverse relationship from Staff back to Review to access reviews created by a specific staff member
-  reviewer = db.relationship('Staff',
-                             backref=db.backref('reviews_created',
-                                                lazy='joined'),
-                             foreign_keys=[reviewerID])
-
+  reviewer = db.relationship('Staff', backref=db.backref('reviews_created', foreign_keys=[reviewerID]))
   studentID = db.Column(db.String(10), db.ForeignKey('student.ID'))
 
   staffUpvoters = db.relationship(

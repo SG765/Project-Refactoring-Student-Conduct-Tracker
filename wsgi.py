@@ -3,7 +3,6 @@ from App.controllers.admin import update_student
 from App.controllers.review import downvote, upvote
 from App.controllers.staff import create_review
 from App.controllers.user import get_student
-from App.views.index import generate_random_contact_number
 import click, pytest, sys
 from flask import Flask, jsonify
 from flask.cli import with_appcontext, AppGroup
@@ -12,7 +11,6 @@ import randomname
 from App.database import db, get_migrate
 from App.main import create_app
 from App.controllers import ( create_user, create_staff, add_student_information, get_all_users_json, get_all_users )
-from App.views import (generate_random_contact_number)
 from App.models import *
 
 # This commands file allow you to create convenient CLI commands for testing controllers
