@@ -1,5 +1,7 @@
 import csv
 from App.controllers.admin import update_student
+from App.controllers.review import downvote, upvote
+from App.controllers.staff import create_review
 from App.controllers.user import get_student
 from App.views.index import generate_random_contact_number
 import click, pytest, sys
@@ -24,16 +26,16 @@ def initialize():
   db.drop_all()
   db.create_all()
   admin= create_user('bob', 'boblast' , 'bobpass')
-  '''for ID in range(50, 150): 
-      student= create_student(admin, str(ID),
+  for ID in range(50, 150): 
+      student= add_student_information(admin, str(ID),
           randomname.get_name(), 
           randomname.get_name(), 
           random.choice(['Full-Time','Part-Time', 'Evening']),
-          str(random.randint(2010, 2020))
+          random.randint(2015, 2023)
       )
       db.session.add(student)
-      db.session.commit()'''
-
+      db.session.commit()
+  print("Database Intialized")
   return jsonify({'message': 'Database initialized'}),201
 
 '''
@@ -45,25 +47,24 @@ User Commands
 def test():
     db.drop_all()
     db.create_all()
-    '''student= Student("1234" , "sally", "trim", "full-time", 2020)
+    student= Student("1234" , "sally", "trim", "full-time", 2020)
     s1= create_staff("55", "Jen", "Jlast", "pass", "email", 2010)
     s2= create_staff("54", "Sen", "Shin", "pass2", "email", 2021)
     s3= create_staff("57", "Sally", "Blue", "pass3", "email", 2014)
     s4= create_staff("59", "Rui", "Pear", "pass4", "email", 2000)
     s5= create_staff("70", "Ren", "Lue", "pass5", "email", 2017)
     r=s1.createReview(student, True, "Positive")
-    r.upvoteReview(s2)
-    r.downvoteReview(s3)
-    r.upvoteReview(s4)
-    r.upvoteReview(s5)
+    upvote(r.ID, s2)
+    downvote(r.ID, s3)
+    upvote(r.ID, s5)
+    upvote(r.ID, s4)
     student2= Student("233", "Luis", "Thompson", "full-time", 2021)
     r2= s2.createReview(student2, True, "Another positive")
-    r2.upvoteReview(s4)
+    upvote(r2.ID, s4)
     print(student.to_json())
-    print("Rankings: \n", s1.getStudentRankings())'''
+    print("Rankings: \n", s1.getStudentRankings())
     admin= create_user("A1", "f", "l")
-    # List of fields that can be updated for a student record
-    allowed_fields = ["ID", "firstname", "lastname", "studenttype", "yearofenrollment"]
+    
     studenttt= Student("100" , "sally", "trim", "full-time", 2020)
     s2=  Student("200" , "sally", "trim", "full-time", 2020)
     db.session.add(studenttt)

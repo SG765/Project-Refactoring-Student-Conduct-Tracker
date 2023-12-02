@@ -26,6 +26,7 @@ from App.controllers import (
     get_student_rankings, 
     search_students_searchTerm
 )
+from App.models.karma import CalculateNegativeKarmaStrategy
 
 LOGGER = logging.getLogger(__name__)
 
@@ -73,13 +74,13 @@ class UserUnitTests(unittest.TestCase):
     def test_admin_to_json(self): 
         newAdmin = Admin("Bob", "Boblast",  "bobpass")
         newAdmin_json = newAdmin.to_json()
-        self.assertDictEqual(newAdmin_json, {"adminID":"A1", "firstname":"Bob", "lastname":"Boblast"})
+        self.assertDictEqual(newAdmin_json, {"adminID": newAdmin.ID, "firstname":"Bob", "lastname":"Boblast"})
 
     # pure function no side effects or integrations called
     def test_get_json(self):
         user = Admin("bob", "boblast",  "bobpass")
         user_json = user.to_json()
-        self.assertDictEqual(user_json, {"adminID":"A1", "firstname":"bob", "lastname":"boblast"})
+        self.assertDictEqual(user_json, {"adminID": user.ID, "firstname":"bob", "lastname":"boblast"})
     
     def test_hashed_password(self):
         password = "mypass"
@@ -150,16 +151,16 @@ class UsersIntegrationTests(unittest.TestCase):
     
     def test_update_student(self): 
         newAdmin = create_user ("tom", "tomlast", "tompass")
-        student = get_student("813") 
+        student = get_student(str("813")) 
         oldFirstname = student.firstname
         oldLastname = student.lastname 
         oldStudentType = student.studentType
         oldYearOfEnrollment = student.yearOfEnrollment
 
-        update_student(newAdmin, student.ID, "firstname", "tominton")
-        update_student(newAdmin, student.ID, "lastname", "tomintonlast")
-        update_student(newAdmin, student.ID, "studentType", "Part-Time")
-        update_student(newAdmin, student.ID, "yearOfEnrollment", 2020)
+        update_student(newAdmin, student, "firstname", "tominton")
+        update_student(newAdmin, student, "lastname", "tomintonlast")
+        update_student(newAdmin, student, "studentType", "Part-Time")
+        update_student(newAdmin, student, "yearOfEnrollment", 2020)
                        
         assert student.firstname != oldFirstname and student.firstname == "tominton"
         assert student.lastname != oldLastname and student.lastname == "tomintonlast"
@@ -260,3 +261,11 @@ class UsersIntegrationTests(unittest.TestCase):
                     if get_staff(str(voter)).ID != review.reviewerID: 
                         assert random.choice([upvote(review.ID, get_staff(str(voter))), downvote(review.ID, get_staff(str(voter)))])
         assert get_student_rankings(get_staff(str(2000))) is not None
+
+    def test_set_strategy(self):
+        admin = create_user("Black", "blacklast", "blackpass")
+        staff = create_staff("432", "Twin3", "password", "6666", "twin3@example.com", 2015)
+        student = add_student_information(admin, "1229", "Still", "Here", "Full-Time", 2019)
+        review = create_review(staff.ID, student.ID, False, "Very negative review")
+        review.set_strategy()
+        assert isinstance(review.karmaStrategy, CalculateNegativeKarmaStrategy)

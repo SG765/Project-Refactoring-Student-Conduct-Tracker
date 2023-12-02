@@ -2,8 +2,8 @@ from App.controllers.user import get_staff, get_student
 from App.models import Staff, Review
 
 def create_review(staffID, studentID, is_positive, comment):
-    staff = get_staff(staffID)
-    student = get_student(studentID)
+    staff = get_staff(str(staffID))
+    student = get_student(str(studentID))
     review = staff.createReview(student, is_positive, comment)
     return review
 

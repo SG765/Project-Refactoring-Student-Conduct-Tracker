@@ -59,7 +59,7 @@ def login_action():
 @auth_views.route('/api/login', methods=['POST'])
 def user_login_api():
 	data = request.json
-	token = jwt_authenticate(data['ID'], data['password'])
+	token = jwt_authenticate(str(data['ID']), data['password'])
 	if not token:
 		return jsonify(message='invalid credentials'), 400
 	return jsonify(access_token=token)
@@ -67,7 +67,7 @@ def user_login_api():
 @auth_views.route('/api/admin/login', methods=['POST'])
 def admin_login_api():
   data = request.json
-  token = jwt_authenticate_admin(data['ID'], data['password'])
+  token = jwt_authenticate_admin(str(data['ID']), data['password'])
   if not token:
     return jsonify(message='invalid credentials'), 400
   return jsonify(access_token=token)
