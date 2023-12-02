@@ -1,5 +1,6 @@
 from App.database import db
 from .student import Student
+from .karma import Karma
 from datetime import datetime
 from .karma import *
 
@@ -116,20 +117,21 @@ class Review(db.Model):
 
     # Retrieve the associated Student object using studentID
     student = Student.query.get(self.studentID)
+    student_karma = Karma.query.filter_by(studentID= self.studentID).first()
 
-    # Check if the student has a Karma record (karmaID) and create a new Karma record for them if not
-    if student.karmaID is None:
-      karma = Karma(self.studentID, score=0.0, rank=-99)
-      db.session.add(karma)  # Add the Karma record to the session
+    # Check if the student has a Karma record and create a new Karma record for them if not
+    if student_karma is None:
+      student_karma = Karma(self.studentID, score=0.0, rank=-99)
+      db.session.add(student_karma)  # Add the Karma record to the session
       db.session.flush()
-      student.karmaID = karma.karmaID  # Set the student's karmaID to the new Karma record's ID
+      db.session.commit()
 
     # Update Karma for the student
-    if student.karmaID is not None:
-      student_karma = Karma.query.get(student.karmaID)
+    if student_karma is not None:
       student_karma.calculate_total_score(student)
       student_karma.updateRank()
       db.session.add(student)
+      db.session.add(student_karma)
       db.session.commit()
 
     return self.upvotes
@@ -156,23 +158,24 @@ class Review(db.Model):
       db.session.add(self)
       db.session.commit()
       
-      # Retrieve the associated Student object using studentID
-      student = Student.query.get(self.studentID)
-      # Check if the student has a Karma record (karmaID) and create a new Karma record for them if not
-      if student.karmaID is None:
-        karma = Karma(self.studentID, score=0.0, rank=-99)
-        db.session.add(karma)  # Add the Karma record to the session
-        db.session.flush()
-        student.karmaID = karma.karmaID  # Set the student's karmaID to the new Karma record's ID
-        db.session.commit()
-  # Update Karma for the student
+     # Retrieve the associated Student object using studentID
+    student = Student.query.get(self.studentID)
+    student_karma = Karma.query.filter_by(studentID= self.studentID).first()
 
-      if student.karmaID is not None:
-        student_karma = Karma.query.get(student.karmaID)
-        student_karma.calculate_total_score(student)
-        student_karma.updateRank()
-        db.session.add(self)
-        db.session.commit()
+    # Check if the student has a Karma record and create a new Karma record for them if not
+    if student_karma is None:
+      student_karma = Karma(self.studentID, score=0.0, rank=-99)
+      db.session.add(student_karma)  # Add the Karma record to the session
+      db.session.flush()
+      db.session.commit()
+
+    # Update Karma for the student
+    if student_karma is not None:
+      student_karma.calculate_total_score(student)
+      student_karma.updateRank()
+      db.session.add(student)
+      db.session.add(student_karma)
+      db.session.commit()
 
     return self.downvotes
 

@@ -10,8 +10,7 @@ class Student(db.Model):
 	yearOfEnrollment = db.Column(db.Integer, nullable=False)
 	yearOfStudy = db.Column(db.Integer)
 	reviews = db.relationship('Review', backref='student', lazy='joined')
-	karmaID = db.Column(db.Integer, db.ForeignKey('karma.karmaID', use_alter=True), nullable=True)
-
+	
   #When student is newly created there would be no reviews or karma yet
 	def __init__(self, studentID, firstname, lastname, studentType, yearofEnrollment):
 		self.ID = studentID
