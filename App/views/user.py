@@ -76,6 +76,19 @@ def update_student_action(id):
     else:
       return jsonify({"error": "Error updating student"}), 400 
 
+@user_views.route("/student/<string:id>", methods=["GET"])
+@jwt_required()
+def get_student_by_id_action(id):
+    if not jwt_current_user:
+      return jsonify({"error" : "Unauthorized: You must be logged in search students"}), 401
+
+    student = get_student(str(id))
+
+    if not student:
+      return jsonify({"error": "Student with id {id} not found"}), 404
+    
+    return jsonify(student.to_json(), "Student found"), 200
+
 
 @user_views.route('/identify', methods=['GET'])
 @jwt_required()
