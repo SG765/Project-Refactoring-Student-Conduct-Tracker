@@ -57,9 +57,9 @@ def update_student_action(id):
 
     data = request.json
     # Normalize the input field name by converting it to lowercase and replacing '-', '_', ' ' with ''
-    input_field = data.get['field_for_update']
+    input_field = data['field_for_update']
     input_field= input_field.lower().replace('-', '').replace('_', '').replace(' ', '')
-    input_value = data.get['new_value']
+    input_value = data['new_value']
     input_value= input_value.lower().replace('-', '').replace('_', '').replace(' ', '')
     
     if (input_field == "studenttype"):
