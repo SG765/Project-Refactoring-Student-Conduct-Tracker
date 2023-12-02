@@ -19,10 +19,16 @@ class Staff(User):
     self.ID = staffID
     self.email = email
     self.yearStartedTeaching = yearStartedTeaching
-    self.teachingExperience = (datetime.now().year) - self.yearStartedTeaching
+    self.teachingExperience = self.calculate_teaching_experience()
 
   def get_id(self):
     return self.ID
+  
+  def calculate_teaching_experience(self, current_date=None):
+    if current_date == None:
+      current_date = datetime.now()
+    
+    return current_date.year - self.yearStartedTeaching
 
 #return staff details on json format
 

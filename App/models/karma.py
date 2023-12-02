@@ -24,17 +24,22 @@ class Karma(db.Model):
 # Calculate the karma score for the provided student based on reviews
 
   def calculate_total_score(self, student):
-    karma = 0
+    karma_score = 0
 
     # Iterate through reviews associated with the student and calculate the karma
     for review in student.reviews:
-      karma += review.karmaStrategy.calculateScore(review)
+      review.set_strategy()
+      karma_strategy = review.karmaStrategy
 
-    self.score= karma
-
+      if karma_strategy:
+        karma_score += karma_strategy.calculateScore(review)
+  
+    self.score= karma_score
     # connect the karma record to the student
     student.karmaID = self.karmaID
 
+    db.session.add(self)
+    db.session.commit()
     return self.score
 
   @classmethod
@@ -63,7 +68,6 @@ class Karma(db.Model):
         prev_score = karma.score
 
       student.karmaID = karma.karmaID
-
   # Commit the changes to the database
     db.session.commit()
 

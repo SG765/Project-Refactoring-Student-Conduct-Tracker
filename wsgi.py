@@ -53,15 +53,11 @@ def test():
     r.downvoteReview(s3)
     r.upvoteReview(s4)
     r.upvoteReview(s5)
-
     student2= Student("233", "Luis", "Thompson", "full-time", 2021)
     r2= s2.createReview(student2, True, "Another positive")
     r2.upvoteReview(s4)
-
     print(student.to_json())
-    print(student2.to_json())
     print("Rankings: \n", s1.getStudentRankings())
-    print(s4.to_json())
 
 # Commands can be organized using groups
 
