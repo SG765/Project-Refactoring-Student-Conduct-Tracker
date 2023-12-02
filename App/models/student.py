@@ -7,7 +7,7 @@ class Student(db.Model):
 	firstname = db.Column(db.String(120), nullable= False)
 	lastname = db.Column(db.String(120), nullable= False)
 	studentType = db.Column(db.String(30))  #full-time, part-time or evening
-	yearOfEnrollment = db.Column(db.Integer)
+	yearOfEnrollment = db.Column(db.Integer, nullable=False)
 	yearOfStudy = db.Column(db.Integer)
 	reviews = db.relationship('Review', backref='student', lazy='joined')
 	karmaID = db.Column(db.Integer, db.ForeignKey('karma.karmaID'))
@@ -41,7 +41,16 @@ class Student(db.Model):
     }
 
 	def calculate_year_study(self): #Dynamically calculate year based on enrollment date
-		return (datetime.now().year) - self.yearOfEnrollment
+		# Get the current date
+		current_date = datetime.now()
+		
+		year_of_study = current_date.year - self.yearOfEnrollment
+		
+		# Adjust the year of study based on the current date
+		if current_date.month >= 9:  # If it's September or later since academic year begins in september
+			year_of_study += 1
+			
+		return max(1, year_of_study)
 
 #get karma record from the karma table using the karmaID attached to the student
 	def getKarma(self):

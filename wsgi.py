@@ -43,11 +43,11 @@ def test():
     db.drop_all()
     db.create_all()
     student= Student("1234" , "sally", "trim", "full-time", 2020)
-    s1= Staff("55", "Jen", "Jlast", "pass", "email", 13)
-    s2= Staff("54", "Sen", "Shin", "pass2", "email", 1)
-    s3= Staff("57", "Sally", "Blue", "pass3", "email", 10)
-    s4= Staff("59", "Rui", "Pear", "pass4", "email", 18)
-    s5= Staff("70", "Ren", "Lue", "pass5", "email", 13)
+    s1= Staff("55", "Jen", "Jlast", "pass", "email", 2010)
+    s2= Staff("54", "Sen", "Shin", "pass2", "email", 2021)
+    s3= Staff("57", "Sally", "Blue", "pass3", "email", 2014)
+    s4= Staff("59", "Rui", "Pear", "pass4", "email", 2000)
+    s5= Staff("70", "Ren", "Lue", "pass5", "email", 2017)
     r=s1.createReview(student, True, "Positive")
     r.upvoteReview(s2)
     r.downvoteReview(s3)
@@ -61,6 +61,7 @@ def test():
     print(student.to_json())
     print(student2.to_json())
     print("Rankings: \n", s1.getStudentRankings())
+    print(s4.to_json())
 
 # Commands can be organized using groups
 
