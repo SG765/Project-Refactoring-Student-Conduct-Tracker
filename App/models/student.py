@@ -40,9 +40,9 @@ class Student(db.Model):
         "karmaRank": karma.rank if karma else None,
     }
 
-	def calculate_year_study(self): #Dynamically calculate year based on enrollment date
-		# Get the current date
-		current_date = datetime.now()
+	def calculate_year_study(self,current_date=None):#Dynamically calculate year based on enrollment date
+		if current_date is None:
+			current_date = datetime.now() 
 		
 		year_of_study = current_date.year - self.yearOfEnrollment
 		

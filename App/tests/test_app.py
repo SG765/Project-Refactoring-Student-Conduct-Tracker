@@ -1,4 +1,6 @@
+from datetime import datetime
 import os, tempfile, pytest, logging, unittest
+from unittest.mock import patch
 from werkzeug.security import check_password_hash, generate_password_hash
 import random
 from App.main import create_app
@@ -40,13 +42,25 @@ class UserUnitTests(unittest.TestCase):
         assert newAdmin.firstname == "Bob" and newAdmin.lastname == "Boblast"
 
     def test_new_staff (self):
-        newStaff = Staff( "342", "Bob", "Charles", "bobpass", "bob.charles@staff.com", "10")
-        assert newStaff.firstname == "Bob" and newStaff.lastname == "Charles" and newStaff.check_password("bobpass") and newStaff.ID == "342" and newStaff.email == "bob.charles@staff.com" and newStaff.teachingExperience == "10"
+        newStaff = Staff( "342", "Bob", "Charles", "bobpass", "bob.charles@staff.com", 2010)
+        assert newStaff.firstname == "Bob" and newStaff.lastname == "Charles" and newStaff.check_password("bobpass") and newStaff.ID == "342" and newStaff.email == "bob.charles@staff.com" and newStaff.yearStartedTeaching == 2010
 
     def test_new_student (self):
-        newStudent = Student( "813", "Joe", "Dune", "Full-Time", "2018")
-        assert newStudent.ID == "813" and newStudent.firstname == "Joe" and newStudent.lastname == "Dune" and newStudent.studentType == "Full-Time" and newStudent.yearOfEnrollment == "2018"
+        newStudent = Student( "813", "Joe", "Dune", "Full-Time", 2018)
+        assert newStudent.ID == "813" and newStudent.firstname == "Joe" and newStudent.lastname == "Dune" and newStudent.studentType == "Full-Time" and newStudent.yearOfEnrollment == 2018
 
+    def test_calculate_year_study(self):
+        # Create a Student object
+        student = Student("123", "John", "Doe", "Full-time", 2022)
+
+       # Set the current date to a specific date (e.g., December 1st, 2023)
+        specific_date = datetime(2023, 12, 1)
+        year_of_study = student.calculate_year_study(current_date=specific_date)
+
+
+        # Assert the expected result based on the mock date
+        self.assertEqual(year_of_study, 2)
+        
     def test_set_password(self): 
         newAdmin = Admin("Bob", "Boblast",  "bobpass")
         password = newAdmin.password
