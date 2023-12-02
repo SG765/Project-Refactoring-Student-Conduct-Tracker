@@ -1,3 +1,5 @@
+import csv
+import json
 import os
 from flask import Flask
 from flask import Blueprint, render_template, jsonify, request, send_from_directory, flash, redirect, url_for, session
@@ -5,6 +7,8 @@ from flask_jwt_extended import jwt_required, current_user as jwt_current_user
 from flask_login import login_required, login_user, current_user, logout_user
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
+from App.controllers.admin import add_student_information, update_student
+from App.controllers.user import get_student
 
 from App.models.admin import Admin
 
@@ -51,20 +55,23 @@ def add_students():
 
     # Read the content of the file
     with open(file_path, 'r') as fp:
-        file_content = fp.read()
-  
+        file_content = csv.DictReader(fp)
+
+        # Iterate over rows in the CSV file
         for row in file_content:
-          if (row['studentType'] != "Full-Time" or row['studentType'] != "Part-Time" or row['studentType'] != "Evening" or row['studentType'] != "Graduated" or row['studentType'] != "On-Leave"):
-            return jsonify({'error':f"{row['studentType']} was not a valid option"}), 400
-          else:
-              student=add_student_information(admin=jwt_current_user,id=row['id'],firstname=row['firstname'],lastname=row['lastname'],studentType=row['studentType'],yearofEnrollmentrow=row['yearofEnrollment'])
-              if student:
-                  return jsonify(student)
-              else:
-                  return jsonify({'error': f"ID already exists {row['ID']} "}), 400
-    return jasonify({'message': f"database Updated"})
-  
-  return jsonify({'message': file_content}), 200
+            student_type = row.get('studentType', '')
+
+            # Normalize the input field name by converting it to lowercase and replacing '-', '_', ' ' with ''
+            input_field = student_type.lower().replace('-', '').replace('_', '').replace(' ', '')
+
+            if input_field not in ["fulltime", "parttime", "evening", "graduated", "onleave"]:
+                return jsonify({'error': 'Invalid studentType in the file'}), 400
+            else:
+                student = add_student_information(admin= jwt_current_user, id=str(row['id']), firstname=row['firstname'], lastname=row['lastname'], studentType=row['studentType'], yearofEnrollment=int(row['yearofEnrollment']))
+                if not student:
+                    return jsonify({'error': f"ID already exists {row['ID']}"}), 400
+    
+    return jsonify({"message": "Student information uploaded successfully"}), 201
 
 #Route to batch update students via file upload
 @admin_views.route('/students', methods=['PUT'])
@@ -72,7 +79,7 @@ def update_students():
     if not jwt_current_user or not isinstance(jwt_current_user, Admin):
       return 'Unauthorized', 401
 
-     # Check if the POST request has a file
+     # Check if the PUT request has a file
     if 'file' not in request.files:
         return jsonify({'error': 'No file selected'}), 400
 
@@ -87,23 +94,37 @@ def update_students():
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
 
-    # Read the content of the file
+    # List of fields that can be updated for a student record
+    allowed_fields = ["ID", "firstname", "lastname", "studenttype", "yearofenrollment"]
+
     with open(file_path, 'r') as fp:
-        file_content = fp.read()
+        file_content = csv.DictReader(fp)
   
         for row in file_content:
-          if (row['field_to-update'] == "studentType"):
-              if (row['new_value'] != "Full-Time" or row['new_value'] != "Part-Time" or row['new_value'] != "Evening" or row['new_value'] != "Graduated" or row['new_value'] != "On-Leave"):
+            # Retrieve the student record based on student id
+            studentid= row['id'].strip()
+            student = get_student(studentID=str(studentid))
+
+            if student is None:
+                return jsonify({'error': f"Student not found"}), 400
+            
+            # Normalize the input field name by converting it to lowercase and replacing '-', '_', ' ' with ''
+            input_field = row['field_for_update'].lower().replace('-', '').replace('_', '').replace(' ', '')
+            input_value = row['new_value'].lower().replace('-', '').replace('_', '').replace(' ', '')
+            
+            if (input_field == "studenttype"):
+                if input_value not in ["fulltime", "parttime", "evening", "graduated", "onleave"]:
                   return jsonify({'error':f"{row['new_value']} was not a valid option"}), 400
-              else:
-                  student=update_student(admin=jwt_current_user,id=row['id'],field_to_update=row['field_to-update'],new_value=row['new_value'])
-          else: 
-              student=update_student(admin=jwt_current_user,id=row['id'],field_to_update=row['field_to-update'],new_value=row['new_value'])
-              
-        if student:
-            return jsonify(student)
-        else:
-            return jsonify({'error': f"There is no student with ID {row['ID']} "}), 400
-        return jasonify({'message': f"database Updated"})
+                else:
+                    student_updated=update_student(admin=jwt_current_user, student=student, field_to_update=row['field_for_update'], new_value=row['new_value'])
+                    if student_updated is None:
+                        return jsonify({'error': f"ID already exists {row['ID']}"}), 400
+                    
+                    return jsonify({"message": "Students information updated successfully"}), 200
+            else: 
+                student_updated=update_student(admin=jwt_current_user,student=student, field_to_update=row['field_for_update'],new_value=row['new_value'])
+                if not student_updated:
+                    return jsonify({'error': f"ID already exists {row['ID']}"}), 400
     
-    return jsonify({'message': f"Students updated"})
+    return jsonify({"message": "Students information updated successfully"}), 200
+

@@ -40,6 +40,25 @@ def test_upload(client):
 		with open('students.csv', 'rb') as file:
 			response = client.post('/students', data={'file': (file, 'students.csv')}, headers=headers, content_type='multipart/form-data')
 
+		assert response.status_code == 201
+		
+def test_update(client):
+        # Authenticate the admin user
+		admin = create_user("bob", "boblast", "passs")   
+		test_data = {
+				'ID': admin.ID,
+				'password': 'passs'
+		}
+		studenttt= Student("100" , "sally", "trim", "full-time", 2020)
+		student4= Student("200" , "sally", "trim", "full-time", 2020)
+		db.session.add(studenttt, student4)
+		db.session.commit()
+		access_token = create_access_token(identity= admin.ID)
+		# Include the access token in the headers for the subsequent request
+		headers = {'Authorization': f'Bearer {access_token}'}
+		with open('updateTest.csv', 'rb') as file:
+			response = client.put('/students', data={'file': (file, 'updateTest.csv')}, headers=headers, content_type='multipart/form-data')
+
 		assert response.status_code == 200
 
 

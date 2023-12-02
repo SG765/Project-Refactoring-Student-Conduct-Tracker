@@ -1,3 +1,6 @@
+import csv
+from App.controllers.admin import update_student
+from App.controllers.user import get_student
 from App.views.index import generate_random_contact_number
 import click, pytest, sys
 from flask import Flask, jsonify
@@ -42,7 +45,7 @@ User Commands
 def test():
     db.drop_all()
     db.create_all()
-    student= Student("1234" , "sally", "trim", "full-time", 2020)
+    '''student= Student("1234" , "sally", "trim", "full-time", 2020)
     s1= create_staff("55", "Jen", "Jlast", "pass", "email", 2010)
     s2= create_staff("54", "Sen", "Shin", "pass2", "email", 2021)
     s3= create_staff("57", "Sally", "Blue", "pass3", "email", 2014)
@@ -57,7 +60,43 @@ def test():
     r2= s2.createReview(student2, True, "Another positive")
     r2.upvoteReview(s4)
     print(student.to_json())
-    print("Rankings: \n", s1.getStudentRankings())
+    print("Rankings: \n", s1.getStudentRankings())'''
+    admin= create_user("A1", "f", "l")
+    # List of fields that can be updated for a student record
+    allowed_fields = ["ID", "firstname", "lastname", "studenttype", "yearofenrollment"]
+    studenttt= Student("100" , "sally", "trim", "full-time", 2020)
+    s2=  Student("200" , "sally", "trim", "full-time", 2020)
+    db.session.add(studenttt)
+    db.session.add(s2)
+    db.session.commit()
+    # Read the content of the file
+    with open("uploads/updateTest.csv", 'r') as fp:
+        file_content = csv.DictReader(fp)
+  
+        for row in file_content:
+            # Retrieve the student record based on student id
+            studentid= row['id'].strip()
+            student = get_student(studentID=str(studentid))
+
+            if student is None:
+                return jsonify({'error': f"Student not found"}), 400
+            
+            # Normalize the input field name by converting it to lowercase and replacing '-', '_', ' ' with ''
+            input_field = row['field_for_update'].lower().replace('-', '').replace('_', '').replace(' ', '')
+            input_value = row['new_value'].lower().replace('-', '').replace('_', '').replace(' ', '')
+            
+            if (input_field == "studenttype"):
+                if input_value not in ["fulltime", "parttime", "evening", "graduated", "onleave"]:
+                  return jsonify({'error':f"{row['new_value']} was not a valid option"}), 400
+                else:
+                    student_updated=update_student(admin=admin, student=student, field_to_update=row['field_for_update'], new_value=row['new_value'])
+            else: 
+                student_updated=update_student(admin=admin,student=student, field_to_update=row['field_for_update'],new_value=row['new_value'])
+            
+            if not student_updated:
+                return jsonify({'error': f"ID already exists {row['ID']}"}), 400
+            print(student_updated.to_json())
+    return jsonify({"message": "Students information updated successfully"}), 200
 
 # Commands can be organized using groups
 
