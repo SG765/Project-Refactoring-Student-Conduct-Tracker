@@ -7,7 +7,7 @@ from sqlalchemy import ForeignKey
 class Karma(db.Model):
   __tablename__ = "karma"
   karmaID = db.Column(db.Integer, primary_key=True)
-  studentID = db.Column(db.String(10), db.ForeignKey('student.ID'))
+  studentID = db.Column(db.String(10), db.ForeignKey(('student.ID'), ondelete='CASCADE'))
   score = db.Column(db.Float, nullable=False, default=0.0)
   rank = db.Column(db.Integer, nullable=False, default=-99)
 
