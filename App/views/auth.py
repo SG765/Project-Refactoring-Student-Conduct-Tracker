@@ -3,6 +3,8 @@ from flask_jwt_extended import jwt_required, current_user as jwt_current_user
 from flask_login import login_required, login_user, current_user, logout_user
 from datetime import datetime, timedelta
 
+from App.controllers.user import create_staff, get_admin, get_staff, get_student
+
 from.index import index_views
 
 from App.controllers import (
@@ -26,7 +28,7 @@ def create_staff_action():
   data = request.json
   
   #validate data
-  if not data['staffID'] or not data['firstname'] or not data['lastname'] or not data['password'] or not data['email'] or not data['teachingExperience']:
+  if not data['staffID'] or not data['firstname'] or not data['lastname'] or not data['password'] or not data['email'] or not data['yearStartedTeaching']:
     return jsonify({"error": "Invalid request data"}), 400
 	  
   email=data['email']	  
@@ -37,7 +39,7 @@ def create_staff_action():
   if get_student(data['staffID']) or get_staff(data['staffID']) or get_admin(data['staffID']):
     return jsonify({"error": f"A user already uses the ID {data['staffID']}"}), 400
   else:    
-    staff = create_staff(data['staffID'], data['firstname'], data['lastname'], data['password'], data['email'], data['teachingExperience'])
+    staff = create_staff(data['staffID'], data['firstname'], data['lastname'], data['password'], data['email'], data['yearStartedTeaching'])
     if staff:
       return jsonify({"message": f"Staff created with ID {staff.ID}"}, staff.to_json()), 200
     else:
@@ -57,7 +59,7 @@ def login_action():
 @auth_views.route('/api/login', methods=['POST'])
 def user_login_api():
 	data = request.json
-	token = jwt_authenticate(data['ID'], data['password'])
+	token = jwt_authenticate(str(data['ID']), data['password'])
 	if not token:
 		return jsonify(message='invalid credentials'), 400
 	return jsonify(access_token=token)
@@ -65,7 +67,7 @@ def user_login_api():
 @auth_views.route('/api/admin/login', methods=['POST'])
 def admin_login_api():
   data = request.json
-  token = jwt_authenticate_admin(data['ID'], data['password'])
+  token = jwt_authenticate_admin(str(data['ID']), data['password'])
   if not token:
     return jsonify(message='invalid credentials'), 400
   return jsonify(access_token=token)

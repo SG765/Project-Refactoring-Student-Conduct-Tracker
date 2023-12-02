@@ -1,5 +1,6 @@
 import random
 from flask import Blueprint, render_template, jsonify
+from App.controllers.admin import add_student_information
 from App.models import db
 from App.controllers import create_user, create_staff
 import randomname
@@ -24,25 +25,22 @@ def init():
   admin= create_user('bob', 'boblast' , 'bobpass')
   for ID in  range(2, 50): 
     staff= create_staff(admin, 
-          randomname.get_name(), 
-          randomname.get_name(), 
-          randomname.get_name(), 
           str(ID), 
-          randomname.get_name() + '@schooling.com', 
-          str(random.randint(1, 15))
+          randomname.get_name(), 
+          randomname.get_name(), 
+          randomname.get_name(), 
+          randomname.get_name() + '@sta.uwi.edu', 
+          random.randint(2008, 2022)
       )
     db.session.add(staff)
     db.session.commit()
 
   for ID in range(50, 150): 
-      contact= generate_random_contact_number()
-      student= create_student(admin, str(ID),
+      student= add_student_information(admin, str(ID),
           randomname.get_name(), 
           randomname.get_name(), 
-          randomname.get_name(),
-          contact,
           random.choice(['Full-Time','Part-Time', 'Evening']),
-          str(random.randint(1, 8))
+          random.randint(2015, 2023)
       )
       db.session.add(student)
       db.session.commit()

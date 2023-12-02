@@ -1,3 +1,4 @@
+from datetime import datetime
 from App.database import db
 from .user import User
 from .student import Student
@@ -9,17 +10,25 @@ class Staff(User):
   __tablename__ = 'staff'
   ID = db.Column(db.String(10), primary_key=True)
   email = db.Column(db.String(120), nullable=False)
-  teachingExperience = db.Column(db.Integer, nullable=False)
+  yearStartedTeaching= db.Column(db.Integer, nullable= False)
+  teachingExperience = db.Column(db.Integer)
 
   def __init__(self, staffID, firstname, lastname, password, email,
-               teachingExperience):
+               yearStartedTeaching):
     super().__init__(firstname, lastname, password)
     self.ID = staffID
     self.email = email
-    self.teachingExperience = teachingExperience
+    self.yearStartedTeaching = yearStartedTeaching
+    self.teachingExperience = self.calculate_teaching_experience()
 
   def get_id(self):
     return self.ID
+  
+  def calculate_teaching_experience(self, current_date=None):
+    if current_date == None:
+      current_date = datetime.now()
+    
+    return current_date.year - self.yearStartedTeaching
 
 #return staff details on json format
 

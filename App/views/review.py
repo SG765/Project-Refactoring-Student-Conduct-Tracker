@@ -125,7 +125,7 @@ def review_edit(review_id):
     if updated: 
       return jsonify(review.to_json(), 'Review Edited'), 200
     else:
-      return "Error updating review", 400
+      return jsonify("Error updating review"), 400
 
 
 
