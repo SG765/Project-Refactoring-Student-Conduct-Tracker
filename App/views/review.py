@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, abort,
 from flask_jwt_extended import jwt_required, current_user as jwt_current_user
 from flask_login import current_user
 from App.controllers.staff import search_students_searchTerm
-from App.controllers.user import get_staff
+from App.controllers.user import get_staff, get_student
 
 from App.controllers.review import (
     get_reviews_by_staff,
@@ -81,7 +81,7 @@ def downvote (review_id):
 # Route to get reviews by student ID
 @review_views.route("/students/<string:student_id>/reviews", methods=["GET"])
 def get_reviews_of_student(student_id):
-    if search_students_searchTerm(student_id):
+    if get_student(str(student_id)):
         reviews = get_reviews_for_student(student_id)
         if reviews:
             return jsonify([review.to_json() for review in reviews]), 200
