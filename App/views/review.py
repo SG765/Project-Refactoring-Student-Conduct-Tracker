@@ -37,7 +37,7 @@ def view_review(review_id):
 #Route to upvote review 
 @review_views.route('/reviews/<int:review_id>/upvote', methods=['POST'])
 @jwt_required()
-def upvote (review_id):
+def upvote_action(review_id):
     if not jwt_current_user or not isinstance(jwt_current_user, Staff):
       return "You are not authorized to upvote this review", 401
       
@@ -59,7 +59,7 @@ def upvote (review_id):
 #Route to downvote review 
 @review_views.route('/reviews/<int:review_id>/downvote', methods=['POST'])
 @jwt_required()
-def downvote (review_id):
+def downvote_action(review_id):
     if not jwt_current_user or not isinstance(jwt_current_user, Staff):
       return "You are not authorized to downvote this review", 401
   
