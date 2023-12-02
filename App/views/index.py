@@ -1,14 +1,14 @@
 import random
 from flask import Blueprint, render_template, jsonify
 from App.controllers.admin import add_student_information
-from App.database import db, get_migrate
-from App.models import *
+from App.models import db
 from App.controllers import create_user, create_staff
 import randomname
 
 from App.models.admin import Admin
 
 index_views = Blueprint('index_views', __name__, template_folder='../templates')
+
 
 # Define a route for the index view
 @index_views.route('/', methods=['GET'])

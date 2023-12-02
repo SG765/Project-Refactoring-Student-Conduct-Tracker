@@ -12,12 +12,12 @@ class Student(db.Model):
 	reviews = db.relationship('Review', backref='student', lazy='joined')
 	
   #When student is newly created there would be no reviews or karma yet
-	def __init__(self, studentID, firstname, lastname, studentType, yearofEnrollment):
+	def __init__(self, studentID, firstname, lastname, studentType, yearOfEnrollment):
 		self.ID = studentID
 		self.firstname = firstname
 		self.lastname = lastname
 		self.studentType = studentType
-		self.yearOfEnrollment = yearofEnrollment
+		self.yearOfEnrollment = yearOfEnrollment
 		self.yearOfStudy = self.calculate_year_study()
 		self.reviews = []
 	

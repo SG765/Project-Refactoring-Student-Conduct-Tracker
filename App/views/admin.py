@@ -67,7 +67,7 @@ def add_students():
             if input_field not in ["fulltime", "parttime", "evening", "graduated", "onleave"]:
                 return jsonify({'error': 'Invalid studentType in the file'}), 400
             else:
-                student = add_student_information(admin= jwt_current_user, id=str(row['id']), firstname=row['firstname'], lastname=row['lastname'], studentType=row['studentType'], yearofEnrollment=int(row['yearofEnrollment']))
+                student = add_student_information(admin= jwt_current_user, id=str(row['id']), firstname=row['firstname'], lastname=row['lastname'], studentType=row['studentType'], yearOfEnrollment=int(row['yearofEnrollment']))
                 if not student:
                     return jsonify({'error': f"ID already exists {row['ID']}"}), 400
     
