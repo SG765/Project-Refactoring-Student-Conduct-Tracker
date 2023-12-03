@@ -1,7 +1,7 @@
 import csv
 from App.controllers.admin import update_student
 from App.controllers.review import downvote, upvote
-from App.controllers.staff import create_review
+from App.controllers.staff import create_review, get_student_rankings
 from App.controllers.user import get_student
 import click, pytest, sys
 from flask import Flask, jsonify
@@ -21,20 +21,68 @@ migrate = get_migrate(app)
 # This command creates and initializes the database
 @app.cli.command("init", help="Creates and initializes the database")
 def initialize():
-  db.drop_all()
-  db.create_all()
-  admin= create_user('bob', 'boblast' , 'bobpass')
-  for ID in range(50, 150): 
-      student= add_student_information(admin, str(ID),
-          randomname.get_name(), 
-          randomname.get_name(), 
-          random.choice(['Full-Time','Part-Time', 'Evening']),
-          random.randint(2015, 2023)
-      )
-      db.session.add(student)
-      db.session.commit()
-  print("Database Intialized")
-  return jsonify({'message': 'Database initialized'}),201
+    db.drop_all()
+    db.create_all()
+    admin= create_user('bob', 'boblast' , 'bobpass')
+
+    #create 48 staff members
+    staff_list = []
+    for ID in  range(2, 50): 
+        staff= create_staff(
+            str(ID), 
+            randomname.get_name(), 
+            randomname.get_name(), 
+            randomname.get_name(), 
+            randomname.get_name() + '@sta.uwi.edu', 
+            random.randint(2008, 2022)
+        )
+        db.session.add(staff)
+        staff_list.append(staff)
+    db.session.commit()
+
+    #create 100 students
+    student_list = []
+    for ID in range(50, 150): 
+        student= add_student_information(admin, str(ID),
+            randomname.get_name(), 
+            randomname.get_name(), 
+            random.choice(['Full-Time','Part-Time', 'Evening']),
+            random.randint(2015, 2023)
+        )
+        db.session.add(student)
+        student_list.append(student)
+    db.session.commit()
+
+    # Add 10 reviews by 10 random staff members for 10 random students
+    review_list= []
+    for staff in random.sample(staff_list, 10):
+        student = random.choice(student_list)
+        is_positive = random.choice([True, False])
+        comment = f"This is a {'positive' if is_positive else 'negative'} review for {student.firstname} {student.lastname}."
+        review = create_review(
+            staffID=staff.ID,
+            studentID=student.ID,
+            is_positive=is_positive,
+            comment=comment
+        )
+        db.session.add(review)
+        review_list.append(review)
+    db.session.commit()
+
+    # Allow 30 random staff members to randomly upvote or downvote a review once
+    for staff in random.sample(staff_list, 30):
+        review= random.choice(review_list)
+        # Check if the staff member is not the creator of the review
+        if staff != review.reviewer:
+            # Randomly upvote or downvote
+            if random.choice([True, False]):
+                upvote(reviewID=review.ID, staff=staff)
+            else:
+                downvote(reviewID=review.ID, staff=staff)
+    db.session.commit()
+    
+    print("Database Intialized")
+    return jsonify({'message': 'Database initialized'}),201
 
 '''
 User Commands
