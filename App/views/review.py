@@ -32,7 +32,7 @@ def view_review(review_id):
     if review:
         return jsonify(review.to_json())
     else: 
-        return 'Review does not exist', 404
+        return jsonify({"error": 'Review does not exist'}), 404
 
 #Route to upvote review 
 @review_views.route('/reviews/<int:review_id>/upvote', methods=['POST'])
@@ -46,7 +46,7 @@ def upvote_action(review_id):
         staff = get_staff(jwt_current_user.ID)
         if staff:
             if staff == review.reviewer:
-                return jsonify({"You cannot upvote your own review"}), 400
+                return jsonify({"error": "You cannot upvote your own review"}), 400
             
             current = review.upvotes
             new_votes= upvote(review_id, staff)
@@ -64,7 +64,7 @@ def upvote_action(review_id):
 @jwt_required()
 def downvote_action(review_id):
     if not jwt_current_user or not isinstance(jwt_current_user, Staff):
-      return "You are not authorized to downvote this review", 401
+      return jsonify({"error": "You are not authorized to downvote this review"}), 401
   
     review= get_review(review_id) 
     if review:
@@ -91,8 +91,8 @@ def get_reviews_of_student(student_id):
         if reviews:
             return jsonify([review.to_json() for review in reviews]), 200
         else:
-            return "No reviews found for the student", 404
-    return "Student does not exist", 404
+            return jsonify({"error": "No reviews found for the student"}), 404
+    return jsonify({"error": "Student does not exist"}), 404
 
 # Route to get reviews by staff ID
 @review_views.route("/staff/<string:staff_id>/reviews", methods=["GET"])
@@ -102,8 +102,8 @@ def get_reviews_from_staff(staff_id):
         if reviews:
             return jsonify([review.to_json() for review in reviews]), 200
         else:
-            return "No reviews found by the staff member", 404
-    return "Staff does not exist", 404
+            return jsonify({"error": "No reviews found by the staff member"}), 404
+    return jsonify({"error": "Staff does not exist"}), 404
 
 # Route to edit a review
 @review_views.route("/review/<int:review_id>", methods=["PUT"])
@@ -124,7 +124,7 @@ def review_edit(review_id):
         return jsonify({"error":"Invalid request data"}), 400
     
     if data['isPositive'] not in (True, False):
-        return jsonify({"message": f"invalid Positivity value  ({data['isPositive']}). Positive: true or false"}), 400
+        return jsonify({"error": f"invalid Positivity value  ({data['isPositive']}). Positive: true or false"}), 400
 
     updated= edit_review(review, staff, data['isPositive'], data['comment'])
     if updated: 

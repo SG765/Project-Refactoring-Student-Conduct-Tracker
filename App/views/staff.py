@@ -20,7 +20,7 @@ def get_staff_action(staff_id):
     staff = get_staff(str(staff_id))
     if staff:
         return jsonify(staff.to_json())
-    return 'Staff not found', 404
+    return jsonify({"error": 'Staff not found'}), 404
 
 #route for review creation
 @staff_views.route('/student/<string:student_id>/reviews', methods=['POST'])

@@ -62,7 +62,7 @@ def user_login_api():
 	data = request.json
 	token = jwt_authenticate_staff(str(data['ID']), data['password'])
 	if not token:
-		return jsonify(message='invalid credentials'), 400
+		return jsonify({"error":'invalid credentials'}), 400
 	return jsonify(access_token=token)
 
 @auth_views.route('/api/admin/login', methods=['POST'])
@@ -70,7 +70,7 @@ def admin_login_api():
   data = request.json
   token = jwt_authenticate_admin(str(data['ID']), data['password'])
   if not token:
-    return jsonify(message='invalid credentials'), 400
+    return jsonify({"error": 'invalid credentials'}), 400
   return jsonify(access_token=token)
 
 
