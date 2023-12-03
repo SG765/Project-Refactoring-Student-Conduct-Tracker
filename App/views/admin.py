@@ -57,6 +57,8 @@ def add_students():
     with open(file_path, 'r') as fp:
         file_content = csv.DictReader(fp)
 
+        students_list = []  # List to store student information
+        
         # Iterate over rows in the CSV file
         for row in file_content:
             student_type = row.get('studentType', '')
@@ -66,12 +68,14 @@ def add_students():
 
             if input_field not in ["fulltime", "parttime", "evening", "graduated", "onleave"]:
                 return jsonify({'error': 'Invalid studentType in the file'}), 400
-            else:
-                student = add_student_information(admin= jwt_current_user, id=str(row['id']), firstname=row['firstname'], lastname=row['lastname'], studentType=row['studentType'], yearOfEnrollment=int(row['yearofEnrollment']))
-                if not student:
-                    return jsonify({'error': f"ID already exists {row['ID']}"}), 400
+
+            student = add_student_information(admin= jwt_current_user, id=str(row['id']), firstname=row['firstname'], lastname=row['lastname'], studentType=row['studentType'], yearOfEnrollment=int(row['yearofEnrollment']))
+            if not student:
+                return jsonify({'error': f"ID already exists {row['ID']}"}), 400
+            
+            students_list.append(student)
     
-    return jsonify({"message": "Student information uploaded successfully"}), 201
+    return jsonify({"message": "Student information uploaded successfully"}, [student.to_json() for student in students_list]), 201
 
 #Route to batch update students via file upload
 @admin_views.route('/students', methods=['PUT'])
@@ -96,10 +100,12 @@ def update_students():
 
     # List of fields that can be updated for a student record
     allowed_fields = ["ID", "firstname", "lastname", "studenttype", "yearofenrollment"]
+    students_list = []  # List to store student information
 
     with open(file_path, 'r') as fp:
         file_content = csv.DictReader(fp)
   
+
         for row in file_content:
             # Retrieve the student record based on student id
             studentid= row['id'].strip()
@@ -125,6 +131,8 @@ def update_students():
                 student_updated=update_student(admin=jwt_current_user,student=student, field_to_update=row['field_for_update'],new_value=row['new_value'])
                 if not student_updated:
                     return jsonify({'error': f"ID already exists {row['ID']}"}), 400
+            
+            students_list.append(student)
     
-    return jsonify({"message": "Students information updated successfully"}), 200
+    return jsonify({"message": "Students information updated successfully"}, [student.to_json() for student in students_list]), 200
 

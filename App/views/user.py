@@ -31,7 +31,7 @@ def get_all_students_action():
     if students:
        return jsonify([student.to_json() for student in students]), 200
     else:
-        return "No students found", 404
+        return ({"error":"No students found"}), 404
 
 
 # Route to get all staff members
@@ -41,7 +41,7 @@ def get_all_staff_action():
     if staff:
         return jsonify([s.to_json() for s in staff]), 200
     else:
-        return "No staff members found", 404
+        return jsonify({"error": "No staff members found"}), 404
 
 
 # Route to update a student's information
@@ -69,10 +69,10 @@ def update_student_action(id):
     student_updated=update_student(admin=jwt_current_user, student=student, field_to_update=data['field_for_update'], new_value=data['new_value'])
     
     if not student_updated:
-        return jsonify({'error': f"ID already exists data['ID']"}), 400
+        return jsonify({'error': f"ID already exists {data['ID']}"}), 400
 
     if student_updated:
-      return jsonify(student.to_json(), "Student information updated successfully"), 200
+      return jsonify({"message": "Student information updated successfully"}, student.to_json()), 200
     else:
       return jsonify({"error": "Error updating student"}), 400 
 
@@ -85,7 +85,7 @@ def get_student_by_id_action(id):
     student = get_student(str(id))
 
     if not student:
-      return jsonify({"error": "Student with id {id} not found"}), 404
+      return jsonify({"error": f"Student with id {id} not found"}), 404
     
     return jsonify(student.to_json(), "Student found"), 200
 

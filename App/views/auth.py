@@ -35,7 +35,7 @@ def create_staff_action():
   email=data['email']	  
   email_status = email.endswith("@sta.uwi.edu")
   if email_status == False:
-      return jsonify({"error": "Invalid email extenstion"}), 400	
+      return jsonify({"error": "Invalid email extension"}), 400	
 	
   if get_student(data['staffID']) or get_staff(data['staffID']) or get_admin(data['staffID']):
     return jsonify({"error": f"A user already uses the ID {data['staffID']}"}), 400

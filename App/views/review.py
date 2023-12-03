@@ -48,13 +48,13 @@ def upvote_action(review_id):
             current = review.upvotes
             new_votes= upvote(review_id, staff)
             if new_votes == current: 
-               return jsonify(review.to_json(), 'Review Already Upvoted'), 201 
+               return jsonify(review.to_json(), {"error":'Review Already Upvoted'}), 201 
             else:
-                return jsonify(review.to_json(), 'Review Upvoted'), 200
+                return jsonify(review.to_json(), {"message":'Review Upvoted Successfully'}), 200
         else: 
-            return jsonify('Staff does not exist'), 404     
+            return jsonify({"error":'Staff does not exist'}), 404     
     else: 
-        return'Review does not exist', 404
+        return jsonify({"error":'Review does not exist'}), 404
 
 #Route to downvote review 
 @review_views.route('/reviews/<int:review_id>/downvote', methods=['POST'])
@@ -70,13 +70,13 @@ def downvote_action(review_id):
             current = review.downvotes
             new_votes= downvote(review_id, staff)
             if new_votes == current: 
-               return jsonify(review.to_json(), 'Review Already Downvoted'), 400 
+               return jsonify(review.to_json(), {"error": 'Review Already Downvoted'}), 400 
             else:
-                return jsonify(review.to_json(), 'Review Downvoted Successfully'), 200 
+                return jsonify(review.to_json(), {"message": 'Review Downvoted Successfully'}), 200 
         else: 
-            return jsonify(get_review(review_id).to_json(), 'Staff does not exist'), 404
+            return jsonify(get_review(review_id).to_json(), {"error":'Staff does not exist'}), 404
     else: 
-        return'Review does not exist', 404
+        return jsonify({"error":'Review does not exist'}), 404
 
 # Route to get reviews by student ID
 @review_views.route("/students/<string:student_id>/reviews", methods=["GET"])
@@ -106,26 +106,26 @@ def get_reviews_from_staff(staff_id):
 def review_edit(review_id):
     review = get_review(review_id)
     if not review:
-      return "Review not found", 404
+      return jsonify({"error":"Review not found"}), 404
       
     if not jwt_current_user or not isinstance(jwt_current_user, Staff) or review.reviewerID != jwt_current_user.ID :
-      return "You are not authorized to edit this review", 401
+      return jsonify({"error":"You are not authorized to edit this review"}), 401
 
     staff = get_staff(jwt_current_user.ID)
 
     data = request.json
 
     if not data['comment']:
-        return "Invalid request data", 400
+        return jsonify({"error":"Invalid request data"}), 400
     
     if data['isPositive'] not in (True, False):
         return jsonify({"message": f"invalid Positivity value  ({data['isPositive']}). Positive: true or false"}), 400
 
     updated= edit_review(review, staff, data['isPositive'], data['comment'])
     if updated: 
-      return jsonify(review.to_json(), 'Review Edited'), 200
+      return jsonify(review.to_json(), {"message":'Review Edited Successfully'}), 200
     else:
-      return jsonify("Error updating review"), 400
+      return jsonify({"error": "Error updating review"}), 400
 
 
 
@@ -135,14 +135,14 @@ def review_edit(review_id):
 def review_delete(review_id):
     review = get_review(review_id)
     if not review:
-      return "Review not found", 404
+      return jsonify({"error":"Review not found"}), 404
 
     if not jwt_current_user or not isinstance(jwt_current_user, Staff) or review.reviewerID != jwt_current_user.ID :
-      return "You are not authorized to delete this review", 401
+      return jsonify({"error":"You are not authorized to delete this review"}), 401
 
     staff = get_staff(jwt_current_user.ID)
    
     if delete_review(review, staff):
-        return "Review deleted successfully", 200
+        return jsonify({"message":"Review deleted successfully"}), 200
     else:
-        return "Issue deleting review", 400
+        return jsonify({"error":"Issue deleting review"}), 400

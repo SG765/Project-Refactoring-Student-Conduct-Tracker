@@ -73,11 +73,16 @@ class Review(db.Model):
 
   def editReview(self, staff, isPositive, comment):
     if self.reviewer == staff:
-      self.isPositive = isPositive
+      if self.isPositive != isPositive: #if positivity changes then reset the votes
+        self.downvotes = 0
+        self.upvotes = 0
+        self.isPositive = isPositive
+
       self.comment = comment
       db.session.add(self)
       db.session.commit()
       return True
+    
     return None
 
   #deletes the review when called if the staff memeber is the creator of the review, return none if not
