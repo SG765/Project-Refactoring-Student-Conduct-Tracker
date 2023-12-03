@@ -71,7 +71,7 @@ def add_students():
 
             student = add_student_information(admin= jwt_current_user, id=str(row['id']), firstname=row['firstname'], lastname=row['lastname'], studentType=row['studentType'], yearOfEnrollment=int(row['yearofEnrollment']))
             if not student:
-                return jsonify({'error': f"ID already exists {row['ID']}"}), 400
+                return jsonify({'error': f"Student with ID {row['id']} already exists"}), 400
             
             students_list.append(student)
     
