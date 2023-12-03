@@ -45,6 +45,9 @@ def upvote_action(review_id):
     if review:
         staff = get_staff(jwt_current_user.ID)
         if staff:
+            if staff == review.reviewer:
+                return jsonify({"You cannot upvote your own review"}), 400
+            
             current = review.upvotes
             new_votes= upvote(review_id, staff)
             if new_votes == current: 
@@ -67,6 +70,8 @@ def downvote_action(review_id):
     if review:
         staff = get_staff(jwt_current_user.ID)
         if staff:
+            if staff == review.reviewer:
+                return jsonify({"error": "You cannot downvote your own review"}), 400
             current = review.downvotes
             new_votes= downvote(review_id, staff)
             if new_votes == current: 
