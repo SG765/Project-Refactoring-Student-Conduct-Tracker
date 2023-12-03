@@ -42,7 +42,7 @@ def create_staff_action():
   else:    
     staff = create_staff(data['staffID'], data['firstname'], data['lastname'], data['password'], data['email'], data['yearStartedTeaching'])
     if staff:
-      return jsonify({"message": f"Staff created with ID {staff.ID}"}, staff.to_json()), 200
+      return jsonify({"message": f"Staff created with ID {staff.ID}"}, staff.to_json()), 201
     else:
       return jsonify({"error": "Error creating staff"}), 400
 
