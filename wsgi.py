@@ -1,9 +1,8 @@
 import csv
 from App.controllers.admin import update_student
 from App.controllers.review import downvote, upvote
-from App.controllers.staff import create_review
+from App.controllers.staff import create_review, get_student_rankings
 from App.controllers.user import get_student
-from App.views.index import generate_random_contact_number
 import click, pytest, sys
 from flask import Flask, jsonify
 from flask.cli import with_appcontext, AppGroup
@@ -12,7 +11,6 @@ import randomname
 from App.database import db, get_migrate
 from App.main import create_app
 from App.controllers import ( create_user, create_staff, add_student_information, get_all_users_json, get_all_users )
-from App.views import (generate_random_contact_number)
 from App.models import *
 
 # This commands file allow you to create convenient CLI commands for testing controllers
@@ -23,20 +21,68 @@ migrate = get_migrate(app)
 # This command creates and initializes the database
 @app.cli.command("init", help="Creates and initializes the database")
 def initialize():
-  db.drop_all()
-  db.create_all()
-  admin= create_user('bob', 'boblast' , 'bobpass')
-  for ID in range(50, 150): 
-      student= add_student_information(admin, str(ID),
-          randomname.get_name(), 
-          randomname.get_name(), 
-          random.choice(['Full-Time','Part-Time', 'Evening']),
-          random.randint(2015, 2023)
-      )
-      db.session.add(student)
-      db.session.commit()
-  print("Database Intialized")
-  return jsonify({'message': 'Database initialized'}),201
+    db.drop_all()
+    db.create_all()
+    admin= create_user('bob', 'boblast' , 'bobpass')
+
+    #create 48 staff members
+    staff_list = []
+    for ID in  range(2, 50): 
+        staff= create_staff(
+            str(ID), 
+            randomname.get_name(), 
+            randomname.get_name(), 
+            randomname.get_name(), 
+            randomname.get_name() + '@sta.uwi.edu', 
+            random.randint(2008, 2022)
+        )
+        db.session.add(staff)
+        staff_list.append(staff)
+    db.session.commit()
+
+    #create 100 students
+    student_list = []
+    for ID in range(50, 150): 
+        student= add_student_information(admin, str(ID),
+            randomname.get_name(), 
+            randomname.get_name(), 
+            random.choice(['Full-Time','Part-Time', 'Evening']),
+            random.randint(2015, 2023)
+        )
+        db.session.add(student)
+        student_list.append(student)
+    db.session.commit()
+
+    # Add 10 reviews by 10 random staff members for 10 random students
+    review_list= []
+    for staff in random.sample(staff_list, 10):
+        student = random.choice(student_list)
+        is_positive = random.choice([True, False])
+        comment = f"This is a {'positive' if is_positive else 'negative'} review for {student.firstname} {student.lastname}."
+        review = create_review(
+            staffID=staff.ID,
+            studentID=student.ID,
+            is_positive=is_positive,
+            comment=comment
+        )
+        db.session.add(review)
+        review_list.append(review)
+    db.session.commit()
+
+    # Allow 30 random staff members to randomly upvote or downvote a review once
+    for staff in random.sample(staff_list, 30):
+        review= random.choice(review_list)
+        # Check if the staff member is not the creator of the review
+        if staff != review.reviewer:
+            # Randomly upvote or downvote
+            if random.choice([True, False]):
+                upvote(reviewID=review.ID, staff=staff)
+            else:
+                downvote(reviewID=review.ID, staff=staff)
+    db.session.commit()
+    
+    print("Database Intialized")
+    return jsonify({'message': 'Database initialized'}),201
 
 '''
 User Commands
@@ -48,17 +94,17 @@ def test():
     db.drop_all()
     db.create_all()
     student= Student("1234" , "sally", "trim", "full-time", 2020)
-    s1= create_staff("55", "Jen", "Jlast", "pass", "email", 2010)
-    s2= create_staff("54", "Sen", "Shin", "pass2", "email", 2021)
-    s3= create_staff("57", "Sally", "Blue", "pass3", "email", 2014)
-    s4= create_staff("59", "Rui", "Pear", "pass4", "email", 2000)
-    s5= create_staff("70", "Ren", "Lue", "pass5", "email", 2017)
+    s1= create_staff("1001", "Jen", "Jlast", "pass", "email", 2010)
+    s2= create_staff("1002", "Sen", "Shin", "pass2", "email", 2021)
+    s3= create_staff("1003", "Sally", "Blue", "pass3", "email", 2014)
+    s4= create_staff("1004", "Rui", "Pear", "pass4", "email", 2000)
+    s5= create_staff("1005", "Ren", "Lue", "pass5", "email", 2017)
     r=s1.createReview(student, True, "Positive")
     upvote(r.ID, s2)
     downvote(r.ID, s3)
     upvote(r.ID, s5)
     upvote(r.ID, s4)
-    student2= Student("233", "Luis", "Thompson", "full-time", 2021)
+    student2= Student("566", "Luis", "Thompson", "full-time", 2021)
     r2= s2.createReview(student2, True, "Another positive")
     upvote(r2.ID, s4)
     print(student.to_json())

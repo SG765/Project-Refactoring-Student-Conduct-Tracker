@@ -77,7 +77,7 @@ class Staff(User):
 
   def getStudentRankings(self):
     students = db.session.query(Student, Karma)\
-                .join(Karma, Student.karmaID == Karma.karmaID)\
+                .join(Karma, Student.ID == Karma.studentID)\
                 .order_by(Karma.rank.asc())\
                 .all()
 

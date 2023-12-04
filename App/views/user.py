@@ -31,7 +31,7 @@ def get_all_students_action():
     if students:
        return jsonify([student.to_json() for student in students]), 200
     else:
-        return "No students found", 404
+        return ({"error":"No students found"}), 404
 
 
 # Route to get all staff members
@@ -41,7 +41,7 @@ def get_all_staff_action():
     if staff:
         return jsonify([s.to_json() for s in staff]), 200
     else:
-        return "No staff members found", 404
+        return jsonify({"error": "No staff members found"}), 404
 
 
 # Route to update a student's information
@@ -53,27 +53,41 @@ def update_student_action(id):
 
     student = get_student(str(id))
     if not student:
-      return jsonify({"error": "Student not found"}), 404
+      return jsonify({"error": "Student with id {id} not found"}), 404
 
-    #if a field was not entered set it to the current value for student so it remains unchanged so no need to enter every field on the request body/form
     data = request.json
-    firstname = data.get("firstname", student.firstname)
-    lastname = data.get("lastname", student.lastname)
-    password = data.get("password", None)
-    contact = data.get("contact", student.contact)
-    student_type = data.get("studentType", student.studentType)
-    yearOfStudy = data.get("yearOfStudy", student.yearOfStudy)
+    # Normalize the input field name by converting it to lowercase and replacing '-', '_', ' ' with ''
+    input_field = data['field_for_update']
+    input_field= input_field.lower().replace('-', '').replace('_', '').replace(' ', '')
+    input_value = data['new_value']
+    input_value= input_value.lower().replace('-', '').replace('_', '').replace(' ', '')
+    
+    if (input_field == "studenttype"):
+        if input_value not in ["fulltime", "parttime", "evening", "graduated", "onleave"]:
+          return jsonify({'error':f"{data['new_value']} was not a valid option"}), 400
 
-    #Make student type case insensitive by converting to title format (1st letter in each word is uppercase)
-    student_type = student_type.strip().title()
-    if student_type not in ('Full-Time', 'Part-Time', 'Evening'):
-        return jsonify({"message": f"invalid student type ({data['studentType']}). Types: Full-Time, Part-Time and Evening"}), 400 
-  
-    updated= update_student(student, firstname, lastname, password, contact, student_type, yearOfStudy)
-    if updated:
-      return jsonify(student.to_json(), "Student information updated successfully"), 200
+    student_updated=update_student(admin=jwt_current_user, student=student, field_to_update=data['field_for_update'], new_value=data['new_value'])
+    
+    if not student_updated:
+        return jsonify({'error': f"ID already exists {data['ID']}"}), 400
+
+    if student_updated:
+      return jsonify({"message": "Student information updated successfully"}, student.to_json()), 200
     else:
       return jsonify({"error": "Error updating student"}), 400 
+
+@user_views.route("/student/<string:id>", methods=["GET"])
+@jwt_required()
+def get_student_by_id_action(id):
+    if not jwt_current_user:
+      return jsonify({"error" : "Unauthorized: You must be logged in search students"}), 401
+
+    student = get_student(str(id))
+
+    if not student:
+      return jsonify({"error": f"Student with id {id} not found"}), 404
+    
+    return jsonify(student.to_json(), "Student found"), 200
 
 
 @user_views.route('/identify', methods=['GET'])

@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, jsonify, request, send_from_direct
 from flask_jwt_extended import jwt_required, current_user as jwt_current_user
 from flask_login import login_required, login_user, current_user, logout_user
 from datetime import datetime, timedelta
+from App.controllers.auth import jwt_authenticate_staff
 
 from App.controllers.user import create_staff, get_admin, get_staff, get_student
 
@@ -34,14 +35,14 @@ def create_staff_action():
   email=data['email']	  
   email_status = email.endswith("@sta.uwi.edu")
   if email_status == False:
-      return jsonify({"error": "Invalid email extenstion"}), 400	
+      return jsonify({"error": "Invalid email extension"}), 400	
 	
   if get_student(data['staffID']) or get_staff(data['staffID']) or get_admin(data['staffID']):
     return jsonify({"error": f"A user already uses the ID {data['staffID']}"}), 400
   else:    
     staff = create_staff(data['staffID'], data['firstname'], data['lastname'], data['password'], data['email'], data['yearStartedTeaching'])
     if staff:
-      return jsonify({"message": f"Staff created with ID {staff.ID}"}, staff.to_json()), 200
+      return jsonify({"message": f"Staff created with ID {staff.ID}"}, staff.to_json()), 201
     else:
       return jsonify({"error": "Error creating staff"}), 400
 
@@ -59,9 +60,9 @@ def login_action():
 @auth_views.route('/api/login', methods=['POST'])
 def user_login_api():
 	data = request.json
-	token = jwt_authenticate(str(data['ID']), data['password'])
+	token = jwt_authenticate_staff(str(data['ID']), data['password'])
 	if not token:
-		return jsonify(message='invalid credentials'), 400
+		return jsonify({"error":'invalid credentials'}), 400
 	return jsonify(access_token=token)
 
 @auth_views.route('/api/admin/login', methods=['POST'])
@@ -69,7 +70,7 @@ def admin_login_api():
   data = request.json
   token = jwt_authenticate_admin(str(data['ID']), data['password'])
   if not token:
-    return jsonify(message='invalid credentials'), 400
+    return jsonify({"error": 'invalid credentials'}), 400
   return jsonify(access_token=token)
 
 

@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
 from App.database import db
 from .student import Student
+from sqlalchemy import ForeignKey
 
 
 class Karma(db.Model):
   __tablename__ = "karma"
   karmaID = db.Column(db.Integer, primary_key=True)
-  studentID = db.Column(db.String(10), db.ForeignKey('student.ID', use_alter=True))
+  studentID = db.Column(db.String(10), db.ForeignKey(('student.ID'), ondelete='CASCADE'))
   score = db.Column(db.Float, nullable=False, default=0.0)
   rank = db.Column(db.Integer, nullable=False, default=-99)
 
@@ -48,7 +49,7 @@ class Karma(db.Model):
 
     # Query all students with karma scores in descending order
     studentsOrdered = db.session.query(Student, Karma)\
-               .join(Karma, Student.karmaID == Karma.karmaID)\
+               .join(Karma, Student.ID == Karma.studentID)\
                .order_by(db.desc(Karma.score))\
                .all()
 

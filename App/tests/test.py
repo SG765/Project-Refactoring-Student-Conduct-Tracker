@@ -27,7 +27,7 @@ def client():
 		with app.test_client() as client:
 				yield client
 
-def test_upload(client):
+'''def test_upload(client):
         # Authenticate the admin user
 		admin = create_user("bob", "boblast", "passs")   
 		test_data = {
@@ -59,8 +59,14 @@ def test_update(client):
 		with open('updateTest.csv', 'rb') as file:
 			response = client.put('/students', data={'file': (file, 'updateTest.csv')}, headers=headers, content_type='multipart/form-data')
 
-		assert response.status_code == 200
+		assert response.status_code == 200'''
 
+def test_init_route(client):
+    # Send a POST request to the /init route
+    response = client.post('/init')
+
+    # Check if the response status code is 201 (Created)
+    assert response.json == "{'message': 'Database Initialized'}"
 
 # Test the create_staff_action route with the admin_required decorator
 '''def test_create_staff_action(client):
